@@ -1,0 +1,25 @@
+// small assertEquals helper.
+//
+// kind of a bummer that you can't require/load files.
+// the output formatting is unfortunate because I don't know how to convert
+// ints to strings :/
+fun assertEqual(expected, actual) {
+  if (expected != actual) {
+    print "FAILURE: expected";
+    print expected;
+    print "got";
+    print actual;
+  }
+}
+
+fun fib(n) {
+  if (n == 0) {
+    return 0; 
+  }
+  if (n == 1) {
+    return 1;
+  }
+  return fib(n-1) + fib(n-2);
+}
+
+assertEqual(55, fib(10));

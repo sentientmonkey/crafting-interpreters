@@ -1,0 +1,122 @@
+#!/usr/bin/env ruby
+
+require_relative 'visitor'
+
+class AstPrinter < Visitor
+  def print(statements)
+    statements.map do |statement| 
+      statement&.accept(self) 
+    end.join("\n")
+  end
+
+  def visit_assign_expr(expr)
+    parentheize(expr.name.lexeme, expr.value)
+  end
+
+  def visit_binary_expr(expr)
+    parentheize(expr.operator.lexeme, expr.left, expr.right)
+  end
+
+  def visit_call_expr(expr)
+    method = if expr.callee.respond_to?(:name)
+               parentheize(expr.callee.name.lexeme, *expr.arguments)
+             else
+               parentheize([expr.callee.keyword.lexeme, expr.callee.method.lexeme].join(' '))
+             end
+    if expr.callee.respond_to?(:object)
+      object = expr.callee.object.accept(self)
+      parentheize([object, method].join(' '))
+    else
+      method
+    end
+  end
+
+  def visit_get_expr(expr)
+    parentheize(expr.name, expr.object)
+  end
+
+  def visit_grouping_expr(expr)
+    parentheize("group", expr.expression)
+  end
+
+  def visit_literal_expr(expr)
+    expr.value&.inspect || 'nil'
+  end
+
+  def visit_logical_expr(expr)
+    parentheize(expr.operator.lexeme, expr.left, expr.right)
+  end
+
+  def visit_set_expr(expr)
+    assign = parentheize("set #{expr.name.lexeme}", expr.value)
+    object = expr.object.accept(self)
+    parentheize([object, assign].join(' '))
+  end
+
+  def visit_this_expr(expr)
+    'this'
+  end
+
+  def visit_unary_expr(expr)
+    parentheize(expr.operator.lexeme, expr.right)
+  end
+
+  def visit_variable_expr(expr)
+    expr.name.lexeme
+  end
+
+  def visit_block_stmt(stmt)
+    parentheize("block", *stmt.statements)
+  end
+
+  def visit_class_stmt(stmt)
+    class_name = "class #{stmt.name.lexeme}"
+    if stmt.superclass
+      class_name << " #{parentheize(stmt.superclass.name.lexeme)}"
+    end
+    parentheize(class_name, *stmt.methods)
+  end
+
+  def visit_if_stmt(stmt)
+    parentheize("if", *[stmt.condition, stmt.then_branch, stmt.else_branch].compact)
+  end
+
+  def visit_expression_stmt(stmt)
+    print([stmt.expression])
+  end
+
+  def visit_function_stmt(stmt)
+    fn_with_args = if stmt.params.empty?
+                     stmt.name.lexeme
+                   else
+                     ([stmt.name.lexeme] + stmt.params.map(&:lexeme)).join(' ')
+                   end
+    parentheize("def #{parentheize(fn_with_args)}", *stmt.body) 
+  end
+
+  def visit_print_stmt(stmt)
+    parentheize("print", stmt.expression)
+  end
+
+  def visit_return_stmt(stmt)
+    parentheize("return", stmt.value)
+  end
+
+  def visit_var_stmt(stmt)
+    parentheize("var #{stmt.name.lexeme}", stmt.initializer)
+  end
+
+  def visit_while_stmt(stmt)
+    parentheize("while", stmt.condition, stmt.body)
+  end
+
+  private
+
+  def parentheize(name, *exprs)
+    if exprs.empty?
+      "(#{name})"
+    else
+      "(#{name} #{exprs.compact.map{|expr| expr.accept(self) }.join(' ')})"
+    end
+  end
+end

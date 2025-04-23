@@ -1,0 +1,39 @@
+// Your first Lox program!
+print "Hello, world!";
+
+1234;
+12.34;
+var foo = 5 * 10;
+
+1 == 2;         // false.
+"cat" != "dog"; // true.
+314 == "pi"; // false.
+
+!true;  // false.
+!false; // true.
+
+true and false; // false.
+true and true;  // true.
+
+var average = (min + max) / 2;
+
+var imAVariable = "here is my value";
+var iAmNil;
+
+var a = 1;
+
+while (a < 10) {
+  print a;
+  a = a + 1;
+}
+
+fun printSum(a, b) {
+  print a + b;
+}
+
+class Brunch < Breakfast {
+  init(meat, bread, drink) {
+    super.init(meat, bread);
+    this.drink = drink;
+  }
+}

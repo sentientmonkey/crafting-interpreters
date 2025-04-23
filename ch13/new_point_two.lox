@@ -1,0 +1,14 @@
+class Point {}
+
+fun newPoint(x, y) {
+  var point = Point();
+  point.x = x;
+  point.y = y;
+  return point;
+}
+
+var x = 0;
+var p = newPoint(x + 2, 0);
+p.y = 3;
+print p.x;
+print p.y;
